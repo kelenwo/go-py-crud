@@ -50,7 +50,7 @@ DB_PASSWORD=your-secure-database-password
 ### 3. Run with Docker Compose
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 The application will be available at `http://localhost:8000`
@@ -277,7 +277,7 @@ pip install pytest pytest-cov httpx
 ### Run All Tests
 ```bash
 # With Docker
-docker-compose exec app pytest tests/ -v
+docker compose exec app pytest tests/ -v
 
 # Without Docker (local development)
 pytest tests/ -v
@@ -361,7 +361,7 @@ python-crud-app/
 │       └── ratelimit.py         # Rate limiting
 ├── tests/                        # Unit tests
 ├── Dockerfile                    # Docker configuration
-├── docker-compose.yml           # Docker Compose setup
+├── docker compose.yml           # Docker Compose setup
 ├── requirements.txt             # Python dependencies
 └── README.md                    # This file
 ```
@@ -375,14 +375,14 @@ python-crud-app/
 **Solution**:
 ```bash
 # Check if PostgreSQL container is running
-docker-compose ps
+docker compose ps
 
 # View PostgreSQL logs
-docker-compose logs postgres
+docker compose logs postgres
 
 # Restart services
-docker-compose down
-docker-compose up --build
+docker compose down
+docker compose up --build
 ```
 
 ### Port Already in Use
@@ -395,7 +395,7 @@ PORT=8001
 DB_PORT=5433
 ```
 
-Then update `docker-compose.yml` port mappings accordingly.
+Then update `docker compose.yml` port mappings accordingly.
 
 ### JWT Token Expired
 

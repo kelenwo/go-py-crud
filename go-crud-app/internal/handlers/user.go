@@ -95,17 +95,14 @@ func UpdateUser(c *gin.Context) {
 
 	// Get the ID from URL parameter
 	id := c.Param("id")
-
-	// Parse ID and check if user is updating their own profile
-	var targetUserID uint
-	if _, err := c.Params.Get("id"); err {
+	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid user ID",
 		})
 		return
 	}
 
-	// Convert string ID to uint
+	// Find the user by ID
 	var user models.User
 	if err := database.DB.First(&user, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -113,10 +110,9 @@ func UpdateUser(c *gin.Context) {
 		})
 		return
 	}
-	targetUserID = user.ID
 
 	// Users can only update their own profile
-	if targetUserID != userID {
+	if user.ID != userID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"error": "You can only update your own profile",
 		})

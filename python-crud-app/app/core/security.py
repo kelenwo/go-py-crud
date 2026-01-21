@@ -6,13 +6,9 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 
 from app.core.config import settings
-
-
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Password validation regex
 PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$")
@@ -37,7 +33,10 @@ def hash_password(password: str) -> str:
         PasswordError: If password doesn't meet security requirements
     """
     validate_password(password)
-    return pwd_context.hash(password)
+    # Use bcrypt directly to avoid passlib initialization issues
+    salt = bcrypt.gensalt(rounds=12)
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -51,7 +50,13 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Returns:
         True if password matches, False otherwise
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return bcrypt.checkpw(
+            plain_password.encode('utf-8'),
+            hashed_password.encode('utf-8')
+        )
+    except Exception:
+        return False
 
 
 def validate_password(password: str) -> None:
@@ -119,8 +124,17 @@ def decode_access_token(token: str) -> Optional[dict]:
         payload = jwt.decode(
             token,
             settings.JWT_SECRET,
-            algorithms=[settings.JWT_ALGORITHM]
+            algorithms=[settings.JWT_ALGORITHM],
+            options={"verify_signature": True, "verify_exp": True}
         )
         return payload
-    except JWTError:
+    except JWTError as e:
+        # Log the error for debugging (in production, remove this)
+        import logging
+        logging.getLogger(__name__).debug(f"JWT decode error: {e}")
+        return None
+    except Exception as e:
+        # Catch any other exceptions
+        import logging
+        logging.getLogger(__name__).debug(f"Unexpected error decoding token: {e}")
         return None
