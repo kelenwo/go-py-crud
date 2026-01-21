@@ -59,8 +59,8 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
     
-    # Generate token
-    token = create_access_token(data={"sub": user.id})
+    # Generate token (sub must be a string for python-jose)
+    token = create_access_token(data={"sub": str(user.id)})
     
     return AuthResponse(
         token=token,
@@ -92,8 +92,8 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
             detail="Invalid email or password"
         )
     
-    # Generate token
-    token = create_access_token(data={"sub": user.id})
+    # Generate token (sub must be a string for python-jose)
+    token = create_access_token(data={"sub": str(user.id)})
     
     return AuthResponse(
         token=token,
